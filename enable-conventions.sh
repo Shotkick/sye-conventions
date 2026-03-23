@@ -2,6 +2,11 @@
 
 #set -euo pipefail
 
+set -x
+trap 'echo "[TRAP] Error on line $LINENO: command=\"$BASH_COMMAND\" exit_code=$?' ERR
+trap 'echo "[TRAP] Executing line $LINENO: $BASH_COMMAND"' DEBUG
+printf "[DEBUG] Debug mode enabled\n"
+
 #Check if script is run by root user
 if [[ $EUID -ne 0 ]]; then
   printf "[ERROR] This script must be run as root." >&2 #redirect to stderr
@@ -19,10 +24,11 @@ DELETE_USER="debian"
 createUser(){
     local username="$1"
     if userExists "$username"; then
-        printf "skip"
+        printf "SKIP  $username already exists\n"
     else
+        printf "Creating $username:  \n"
         adduser "$username"
-        printf "ok"
+        printf "OK  $username has been created\n"
     fi
 }
 
@@ -37,11 +43,11 @@ addSudoUser(){
     local sudoersLine="${username} ALL=(ALL) NOPASSWD:ALL"
 
     if [[ -f "$sudoersFile" ]] && grep -qF "$sudoersLine" "$sudoersFile"; then
-        printf "skip"
+        printf "SKIP  $username is already added in sudoers file\n"
     else
         echo "$sudoersLine" > "$sudoersFile"
         chmod 0440 "$sudoersFile"
-        printf "ok"
+        printf "OK  $username sudoers file has been added\n"
     fi
 }
 
@@ -53,23 +59,26 @@ setupUserSSH(){
 
     if [[ ! -d "$sshDir" ]]; then
         mkdir -p "$sshDir" #-p checks and creates parent folders if not existent
-        printf "ok"
+        printf "OK  .ssh directory for $username has been created\n"
     fi
     chmod 700 "$sshDir"
     chown "${username}:${username}" "$sshDir"
 
     if [[ -f "$authKeys" ]] && grep -qF "$key" "$authKeys"; then
-        printf "[SKIP]   SSH key for '%s' already present in authorized_keys.\n" "$username"
+        printf "SKIP  SSH key for $username already in authorized_keys\n"
     else
         echo "$pubkey" >> "$authKeys"
-        printf "[OK]     Added SSH key for '%s'.\n" "$username"
+        printf "OK  Added SSH key for $username.\n"
     fi
+
+    chmod 600 "$auth_keys"
+    chown "${username}:${username}" "$auth_keys"
 }
 
 deleteUser(){
     local username="$1"
     if userExists "$username"; then
-        deluser $username
+        deluser --remove-home $username
         printf "ok"
     else
         printf "skip"
