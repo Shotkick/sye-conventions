@@ -88,7 +88,7 @@ deleteUser(){
 for username in "${!USER_KEYS[@]}"; do #! = keys, not values
     createUser "$username"
     addSudoUser "$username"
-    setupUserSSH "$username" ${USER_KEYS[$username]}
+    setupUserSSH "$username" "${USER_KEYS[$username]}"
 done
 printf "\n"
 
