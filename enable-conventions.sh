@@ -5,11 +5,11 @@
 set -x
 trap 'echo "[TRAP] Error on line $LINENO: command=\"$BASH_COMMAND\" exit_code=$?' ERR
 trap 'echo "[TRAP] Executing line $LINENO: $BASH_COMMAND"' DEBUG
-printf "[DEBUG] Debug mode enabled\n"
+printf "DEBUG  Debug mode enabled\n"
 
 #Check if script is run by root user
 if [[ $EUID -ne 0 ]]; then
-  printf "[ERROR] This script must be run as root." >&2 #redirect to stderr
+  printf "ERROR  This script must be run as root." >&2 #redirect to stderr
   exit 1
 fi
 
@@ -45,7 +45,7 @@ addSudoUser(){
     if [[ -f "$sudoersFile" ]] && grep -qF "$sudoersLine" "$sudoersFile"; then
         printf "SKIP  $username is already added in sudoers file\n"
     else
-        echo "djordjevic ALL=(ALL) NOPASSWD:ALL" | tee /etc/sudoers.d/djordjevic > /dev/null
+        echo "${username} ALL=(ALL) NOPASSWD:ALL" | tee /etc/sudoers.d/${username} > /dev/null
         chmod 0440 "$sudoersFile"
         printf "OK  $username sudoers file has been added\n"
     fi
