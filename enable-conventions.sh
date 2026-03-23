@@ -71,17 +71,17 @@ setupUserSSH(){
         printf "OK  Added SSH key for $username.\n"
     fi
 
-    chmod 600 "$auth_keys"
-    chown "${username}:${username}" "$auth_keys"
+    chmod 600 "$authKeys"
+    chown "${username}:${username}" "$authKeys"
 }
 
 deleteUser(){
     local username="$1"
     if userExists "$username"; then
         deluser --remove-home $username
-        printf "ok"
+        printf "OK  User $username has been deleted\n"
     else
-        printf "skip"
+        printf "SKIP  User $username doesn't exist"
     fi
 }
 
