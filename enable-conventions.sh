@@ -17,8 +17,8 @@ declare -A USER_KEYS=(
 DELETE_USER="debian"
 
 createUser(){
-    local username = "$1"
-    if doesUserExist $username then
+    local username="$1"
+    if userExists "$username"; then
         printf "skip"
     else
         adduser "$username"
@@ -36,7 +36,7 @@ addSudoUser(){
     local sudoersFile="/etc/sudoers.d/${username}"
     local sudoersLine="${username} ALL=(ALL) NOPASSWD:ALL"
 
-    if [[-f "$sudoersFile"]] && grep -qF "$sudoersLine" "$sudoersFile"; then
+    if [[ -f "$sudoersFile" ]] && grep -qF "$sudoersLine" "$sudoersFile"; then
         printf "skip"
     else
         echo "$sudoersLine" > "$sudoersFile"
@@ -51,17 +51,24 @@ setupUserSSH(){
     local sshDir="/home/${username}/.ssh"
     local authKeys="${sshDir}/authorized_keys"
 
-    if [[ ! -d "$ssh_dir" ]]; then
-        mkdir -p "$ssh_dir" #-p checks and creates parent folders if not existent
+    if [[ ! -d "$sshDir" ]]; then
+        mkdir -p "$sshDir" #-p checks and creates parent folders if not existent
         printf "ok"
     fi
-    chmod 700 "$ssh_dir"
-    chown "${username}:${username}" "$ssh_dir"
+    chmod 700 "$sshDir"
+    chown "${username}:${username}" "$sshDir"
+
+    if [[ -f "$authKeys" ]] && grep -qF "$key" "$authKeys"; then
+        printf "[SKIP]   SSH key for '%s' already present in authorized_keys.\n" "$username"
+    else
+        echo "$pubkey" >> "$authKeys"
+        printf "[OK]     Added SSH key for '%s'.\n" "$username"
+    fi
 }
 
 deleteUser(){
     local username="$1"
-    if doesUserExist $username then
+    if userExists "$username"; then
         deluser $username
         printf "ok"
     else
@@ -70,8 +77,10 @@ deleteUser(){
 }
 
 for username in "${!USER_KEYS[@]}"; do #! = keys, not values
-    createUser $username
-    addSudoUser $username
-    setupUserSSH $username ${USER_KEYS[$username]}
+    createUser "$username"
+    addSudoUser "$username"
+    setupUserSSH "$username" ${USER_KEYS[$username]}
 done
 printf "\n"
+
+deleteUser "$DELETE_USER"
