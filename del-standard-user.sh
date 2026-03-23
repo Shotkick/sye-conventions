@@ -26,4 +26,9 @@ deleteUser(){
     fi
 }
 
+userExists() {
+    local username="$1"
+    id "$username" &>/dev/null
+}
+
 deleteUser "$DELETE_USER"
