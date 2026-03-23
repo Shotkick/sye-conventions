@@ -19,7 +19,7 @@ deleteUser(){
     local username="$1"
     if userExists "$username"; then
         deluser --remove-home $username
-        rm "/etc/sudoers.d/${username}"
+        rm "/etc/sudoers.d/90-cloud-init-users"
         printf "OK  User $username has been deleted\n"
     else
         printf "SKIP  User $username doesn't exist"
