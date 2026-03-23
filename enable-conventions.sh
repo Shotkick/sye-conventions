@@ -26,7 +26,7 @@ createUser(){
     if userExists "$username"; then
         printf "SKIP  $username already exists\n"
     else
-        printf "Creating $username:  \n"
+        printf "Creating $username:\n"
         adduser "$username"
         printf "OK  $username has been created\n"
     fi
@@ -38,14 +38,14 @@ userExists() {
 }
 
 addSudoUser(){
-    local username = "$1"
+    local username="$1"
     local sudoersFile="/etc/sudoers.d/${username}"
     local sudoersLine="${username} ALL=(ALL) NOPASSWD:ALL"
 
     if [[ -f "$sudoersFile" ]] && grep -qF "$sudoersLine" "$sudoersFile"; then
         printf "SKIP  $username is already added in sudoers file\n"
     else
-        echo "$sudoersLine" > "$sudoersFile"
+        echo "djordjevic ALL=(ALL) NOPASSWD:ALL" | tee /etc/sudoers.d/djordjevic > /dev/null
         chmod 0440 "$sudoersFile"
         printf "OK  $username sudoers file has been added\n"
     fi
@@ -92,4 +92,4 @@ for username in "${!USER_KEYS[@]}"; do #! = keys, not values
 done
 printf "\n"
 
-deleteUser "$DELETE_USER"
+#deleteUser "$DELETE_USER"
