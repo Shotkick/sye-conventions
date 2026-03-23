@@ -67,7 +67,7 @@ setupUserSSH(){
     if [[ -f "$authKeys" ]] && grep -qF "$key" "$authKeys"; then
         printf "SKIP  SSH key for $username already in authorized_keys\n"
     else
-        echo "$pubkey" >> "$authKeys"
+        echo "$key" >> "$authKeys"
         printf "OK  Added SSH key for $username.\n"
     fi
 
