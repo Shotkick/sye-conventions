@@ -19,8 +19,6 @@ declare -A USER_KEYS=(
   [beldi]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCgzome8dtFa1rxKLKct44g4fZaLHu5WL4rbpVlb4Vl9fVsCVwzDSkfMWGL3FDlGHafLEXWXUFprevh7liTZDu3aLriT3Z4Cq61JH6AG/b5w+5YC2he/HZeqO65oaKMnG0aLorn0kd2RmcFNde2rYjhyxQgngrhgtnjJ10szwxP60lkmvV7zeq5syiUGe8xZQe6rNNYbwJ1zk2I6TbU0u6HmCtcDixH9b2lDMxBD2ETz/aPfMb7Zd5kiwT+aHEVD6YBlg6fuFqMB5PUtyMJHT4WCikhkwQ/HngrLdJVNraDEJFrEWnwv/yKnrbwNYg2xgPekwM3hl4PuL8j5iwbZ63mvY6sW5yBsgvOg1A6ZjY96CXFoZ0VVlLs2vzq1mYoTEwraBXQHmI9hXWKJVBaBMw1reZ2q+PVjMwL4pTTpoOaCFihnicENrhi726Bs1qPNt+7uh+0PhvV3IcKzUk6OBrCmuT7EV6EHG/EsmS4LzIQ/jDLVr3l3S4wAJyUcFX2MgMNsmN/Y+KLsJG6OqDpnN1q+T7CIx3Q4lu3VwlNX6o+iYV+1lLn0M81SLl5KZEfGkNeiI3nU+cL8IRlyDPp3Bga4c2p+nQBRxbP6eg3JeRCugMjGuWvaCGi/P5wRX95ezjk4488oivRVdNxYeLxvIm8/zGgoIaQ69T9yS1h+XnVVw== insy-switch-engines"
 )
 
-DELETE_USER="debian"
-
 createUser(){
     local username="$1"
     if userExists "$username"; then
@@ -75,21 +73,9 @@ setupUserSSH(){
     chown "${username}:${username}" "$authKeys"
 }
 
-deleteUser(){
-    local username="$1"
-    if userExists "$username"; then
-        deluser --remove-home $username
-        printf "OK  User $username has been deleted\n"
-    else
-        printf "SKIP  User $username doesn't exist"
-    fi
-}
-
 for username in "${!USER_KEYS[@]}"; do #! = keys, not values
     createUser "$username"
     addSudoUser "$username"
     setupUserSSH "$username" "${USER_KEYS[$username]}"
 done
 printf "\n"
-
-#deleteUser "$DELETE_USER"
